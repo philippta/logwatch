@@ -31,6 +31,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	pattern, err := regexp.Compile(*regex)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Could not compile your regex pattern: \n\t%v\n", err)
+		os.Exit(1)
+	}
+
 	t, err := tail.TailFile(*file, tail.Config{
 		Follow: true,
 		ReOpen: true,
@@ -45,8 +51,7 @@ func main() {
 	}
 
 	for line := range t.Lines {
-		matched, _ := regexp.MatchString(*regex, line.Text)
-		if !matched {
+		if !pattern.MatchString(line.Text) {
 			continue
 		}
 
